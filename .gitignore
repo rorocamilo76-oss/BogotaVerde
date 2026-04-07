@@ -1,0 +1,7 @@
+# Ignorar archivos temporales de Android y Termux
+.DS_Store
+node_modules/
+.cache/
+*.log
+# Ignorar carpetas de respaldo locales
+*_Backup/

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BogotáVerde Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div id="app-content" class="container">
+        <header>
+            <h1>BogotáVerde 🌿</h1>
+            <p id="fecha-hoy"></p>
+        </header>
+
+        <div class="card">
+            <h2>1. Salud (IMC OMS)</h2>
+            <input type="number" id="peso" placeholder="Peso (kg)">
+            <input type="number" id="altura" placeholder="Altura (ej: 1.65)">
+            <button onclick="calcularIMC()">Analizar Salud</button>
+            <div id="res-imc" class="resultado"></div>
+        </div>
+
+        <div class="card">
+            <h2>2. Recuperación de Sueño</h2>
+            <input type="number" id="horasSueno" placeholder="Horas dormidas">
+            <button onclick="calcularDescanso()">Ver Plan de Entrenamiento</button>
+            <div id="res-sueno" class="resultado"></div>
+        </div>
+
+        <div class="card">
+            <h2>3. Actividad Diaria</h2>
+            <h1 id="contador-pasos">0</h1>
+            <button onclick="iniciarPodometro()">Activar Sensores (X,Y,Z)</button>
+        </div>
+
+        <div class="card reporte">
+            <h2>4. Tu Rendimiento (15 días)</h2>
+            <p>Descarga tu informe de progreso y recomendaciones.</p>
+            <button onclick="generarPDF()" style="background: #3498db;">Descargar Reporte PDF</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
