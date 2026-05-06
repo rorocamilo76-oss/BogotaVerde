@@ -68,3 +68,9 @@ function generarPDF() {
     };
     html2pdf().set(opt).from(element).save();
 }
+nano index.html
+<script>
+  if (!sessionStorage.getItem("acceso")) {
+    window.location.href = "login.html";
+  }
+</script>
