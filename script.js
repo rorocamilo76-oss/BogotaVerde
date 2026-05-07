@@ -105,7 +105,7 @@ function generarPDF() {
     filename: nombreArchivo + '.pdf',
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { 
-      scale: 3, // Mayor escala para evitar el blanco
+      scale: 5, // Mayor escala para evitar el blanco
       useCORS: true,
       letterRendering: true,
       scrollY: 0 
