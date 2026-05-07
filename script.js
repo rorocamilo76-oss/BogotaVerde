@@ -284,4 +284,4 @@ function generarPDF() {
   html2pdf().set(opt).from(elemento).save().then(() => {
     document.body.removeChild(elemento);
   });
-      }
+  }
