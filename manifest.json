@@ -1,18 +1,15 @@
 {
-  "name": "KOAJ כּוֹחַ – Fuerza Vital",
+  "name": "KOAJ Fuerza Vital",
   "short_name": "KOAJ",
-  "description": "Tu app de fitness y salud con fuerza vital",
-  "start_url": "/BogotaVerde/index.html",
-  "scope": "/BogotaVerde/",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#2ecc71",
-  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1a7a3a",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
