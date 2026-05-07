@@ -3,50 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BogotáVerde Pro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+    <title>Koaj כּוֹחַ – Fuerza Vital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <script>
-  if (!sessionStorage.getItem("acceso")) {
-    window.location.href = "login.html";
-  }
+    if (!sessionStorage.getItem("acceso")) {
+      window.location.href = "login.html";
+    }
   </script>
-    <div id="app-content" class="container">
-        <header>
-            <h1>BogotáVerde 🌿</h1>
-            <p id="fecha-hoy"></p>
-        </header>
 
-        <div class="card">
-            <h2>1. Salud (IMC OMS)</h2>
-            <input type="number" id="peso" placeholder="Peso (kg)">
-            <input type="number" id="altura" placeholder="Altura (ej: 1.65)">
-            <button onclick="calcularIMC()">Analizar Salud</button>
-            <div id="res-imc" class="resultado"></div>
-        </div>
+  <!-- SOL VERDE SVG fondo -->
+  <div class="sol-bg">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="45" fill="#2ecc71" opacity="0.15"/>
+      <circle cx="100" cy="100" r="60" fill="none" stroke="#2ecc71" stroke-width="1.5" opacity="0.1"/>
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#2ecc71" stroke-width="1" opacity="0.07"/>
+      <!-- Rayos -->
+      <g stroke="#2ecc71" stroke-width="2" opacity="0.12">
+        <line x1="100" y1="10" x2="100" y2="30"/>
+        <line x1="100" y1="170" x2="100" y2="190"/>
+        <line x1="10" y1="100" x2="30" y2="100"/>
+        <line x1="170" y1="100" x2="190" y2="100"/>
+        <line x1="29" y1="29" x2="43" y2="43"/>
+        <line x1="157" y1="157" x2="171" y2="171"/>
+        <line x1="171" y1="29" x2="157" y2="43"/>
+        <line x1="43" y1="157" x2="29" y2="171"/>
+      </g>
+    </svg>
+  </div>
 
-        <div class="card">
-            <h2>2. Recuperación de Sueño</h2>
-            <input type="number" id="horasSueno" placeholder="Horas dormidas">
-            <button onclick="calcularDescanso()">Ver Plan de Entrenamiento</button>
-            <div id="res-sueno" class="resultado"></div>
-        </div>
+  <div class="container" id="app-content">
 
-        <div class="card">
-            <h2>3. Actividad Diaria</h2>
-            <h1 id="contador-pasos">0</h1>
-            <button onclick="iniciarPodometro()">Activar Sensores (X,Y,Z)</button>
-        </div>
+    <header>
+      <div class="logo-sol">
+        <svg viewBox="0 0 80 80" width="54" height="54">
+          <circle cx="40" cy="40" r="18" fill="#2ecc71"/>
+          <circle cx="40" cy="40" r="26" fill="none" stroke="#2ecc71" stroke-width="2" opacity="0.5"/>
+          <g stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round">
+            <line x1="40" y1="4" x2="40" y2="14"/>
+            <line x1="40" y1="66" x2="40" y2="76"/>
+            <line x1="4" y1="40" x2="14" y2="40"/>
+            <line x1="66" y1="40" x2="76" y2="40"/>
+            <line x1="14" y1="14" x2="21" y2="21"/>
+            <line x1="59" y1="59" x2="66" y2="66"/>
+            <line x1="66" y1="14" x2="59" y2="21"/>
+            <line x1="21" y1="59" x2="14" y2="66"/>
+          </g>
+        </svg>
+      </div>
+      <div class="header-text">
+        <h1>KOAJ <span class="hebrew">כּוֹחַ</span></h1>
+        <p class="subtitulo">Fuerza Vital · Fitness Pro</p>
+      </div>
+      <p id="fecha-hoy" class="fecha"></p>
+    </header>
 
-        <div class="card reporte">
-            <h2>4. Tu Rendimiento (15 días)</h2>
-            <p>Descarga tu informe de progreso y recomendaciones.</p>
-            <button onclick="generarPDF()" style="background: #3498db;">Descargar Reporte PDF</button>
+    <!-- SECCIÓN 1: IMC -->
+    <div class="card">
+      <div class="card-num">01</div>
+      <h2>Salud IMC <span class="tag">OMS</span></h2>
+      <div class="inputs-row">
+        <div class="input-wrap">
+          <label>Peso (kg)</label>
+          <input type="number" id="peso" placeholder="70">
         </div>
+        <div class="input-wrap">
+          <label>Altura (m)</label>
+          <input type="number" id="altura" placeholder="1.70" step="0.01">
+        </div>
+      </div>
+      <button onclick="calcularIMC()">⚡ Analizar Salud</button>
+      <div id="res-imc" class="resultado"></div>
     </div>
-    <script src="script.js"></script>
+
+    <!-- SECCIÓN 2: SUEÑO -->
+    <div class="card">
+      <div class="card-num">02</div>
+      <h2>Recuperación de Sueño</h2>
+      <div class="input-wrap">
+        <label>Horas dormidas</label>
+        <input type="number" id="horasSueno" placeholder="7" min="0" max="24">
+      </div>
+      <button onclick="calcularDescanso()">🌙 Ver Plan de Entrenamiento</button>
+      <div id="res-sueno" class="resultado"></div>
+    </div>
+
+    <!-- SECCIÓN 3: ACTIVIDAD / PODÓMETRO -->
+    <div class="card card-pasos">
+      <div class="card-num">03</div>
+      <h2>Actividad Diaria</h2>
+
+      <div class="pasos-display">
+        <div class="pasos-numero" id="contador-pasos">0</div>
+        <div class="pasos-label">pasos hoy</div>
+      </div>
+
+      <div class="barra-progreso-wrap">
+        <div class="barra-progreso">
+          <div class="barra-fill" id="barra-fill"></div>
+        </div>
+        <span id="pct-meta">0% de tu meta (10,000 pasos)</span>
+      </div>
+
+      <div class="texto-caminar">
+        <p>🌿 <strong>¿Por qué caminar cambia tu vida?</strong> Caminar 30 minutos al día reduce el riesgo de enfermedades cardíacas en un 35%, mejora el estado de ánimo, activa el metabolismo y fortalece huesos y articulaciones. Es el ejercicio más natural del ser humano: gratuito, accesible y transformador. ¡Cada paso cuenta!</p>
+      </div>
+
+      <div class="btns-pasos">
+        <button onclick="iniciarPodometro()" id="btn-sensor">🚶 Activar Sensor de Pasos</button>
+        <button onclick="guardarRutina()" class="btn-secundario">💾 Guardar Rutina del Día</button>
+        <button onclick="resetearPasos()" class="btn-peligro">🔄 Nueva Rutina / Resetear</button>
+      </div>
+
+      <div id="res-pasos" class="resultado"></div>
+
+      <!-- Historial de rutinas guardadas -->
+      <div id="historial-rutinas" class="historial"></div>
+    </div>
+
+    <!-- SECCIÓN 4: REPORTE PDF -->
+    <div class="card card-reporte">
+      <div class="card-num">04</div>
+      <h2>Tu Reporte de Rendimiento</h2>
+
+      <div class="reporte-texto">
+        <p>📊 <strong>Tu reporte KOAJ</strong> incluye un análisis completo de tu salud: índice de masa corporal según estándares OMS, plan de entrenamiento personalizado según tu descanso, resumen de actividad física diaria con pasos registrados y porcentaje de meta alcanzada, historial de rutinas guardadas y recomendaciones personalizadas para mejorar tu rendimiento físico. Descárgalo en PDF al instante y guárdalo con la fecha que prefieras.</p>
+      </div>
+
+      <div class="input-wrap">
+        <label>Nombre del reporte (opcional)</label>
+        <input type="text" id="nombre-reporte" placeholder="Ej: Mi progreso Mayo 2026">
+      </div>
+
+      <button onclick="generarPDF()" class="btn-pdf">📄 Descargar Reporte PDF</button>
+    </div>
+
+  </div>
+
+  <!-- Contenido oculto para PDF (completo) -->
+  <div id="pdf-content" style="display:none; padding:20px; font-family:sans-serif; color:#000; background:#fff;">
+    <h1 style="color:#1a7a3a; text-align:center;">KOAJ כּוֹחַ – Reporte de Rendimiento</h1>
+    <p id="pdf-fecha" style="text-align:center; color:#555;"></p>
+    <hr>
+    <div id="pdf-imc-section"><h3>📊 Salud IMC</h3><p id="pdf-imc">No calculado aún.</p></div>
+    <div id="pdf-sueno-section"><h3>🌙 Plan de Entrenamiento (Sueño)</h3><p id="pdf-sueno">No calculado aún.</p></div>
+    <div id="pdf-pasos-section"><h3>🚶 Actividad del Día</h3><p id="pdf-pasos"></p></div>
+    <div id="pdf-rutinas-section"><h3>💾 Historial de Rutinas</h3><div id="pdf-rutinas"></div></div>
+    <hr>
+    <p style="color:#1a7a3a; font-weight:bold; text-align:center;">¡Sigue adelante! Cada paso es fuerza vital. — KOAJ App</p>
+  </div>
+
+  <script src="script.js"></script>
 </body>
-</html>
+            </html>
