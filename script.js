@@ -1,13 +1,29 @@
 // ===== KOAJ כּוֹחַ – SCRIPT COMPLETO =====
 
-// FECHA
 const hoy = new Date();
+const claveHoy = hoy.toISOString().slice(0, 10); // "2026-05-06"
+
 document.getElementById('fecha-hoy').innerText =
   hoy.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-// ===== 1. IMC =====
-let ultimoIMC = "No calculado en esta sesión.";
+// ===== CARGAR DATOS GUARDADOS DEL DÍA =====
+function cargarDatos() {
+  const datos = JSON.parse(localStorage.getItem('koaj_dia_' + claveHoy) || '{}');
+  return datos;
+}
 
+function guardarDato(clave, valor) {
+  const datos = cargarDatos();
+  datos[clave] = valor;
+  localStorage.setItem('koaj_dia_' + claveHoy, JSON.stringify(datos));
+}
+
+// Mostrar datos guardados al cargar
+const datosDia = cargarDatos();
+if (datosDia.imc) document.getElementById('res-imc').innerHTML = `<p class="${datosDia.imcClase}">${datosDia.imc}</p>`;
+if (datosDia.sueno) document.getElementById('res-sueno').innerHTML = `<p>${datosDia.sueno}</p>`;
+
+// ===== 1. IMC =====
 function calcularIMC() {
   const peso = parseFloat(document.getElementById('peso').value);
   const altura = parseFloat(document.getElementById('altura').value);
@@ -22,26 +38,29 @@ function calcularIMC() {
   let msg = "", clase = "";
 
   if (imc < 18.5) {
-    msg = `Tu IMC es ${imc} — Bajo peso. Rango ideal OMS: 18.5–24.9. Aumenta tu ingesta calórica saludable con proteínas y grasas buenas.`;
+    msg = `Tu IMC es ${imc} — Bajo peso. Rango ideal OMS: 18.5–24.9. Aumenta tu ingesta calórica saludable.`;
     clase = "alerta";
   } else if (imc <= 24.9) {
-    msg = `Tu IMC es ${imc} — ¡Peso Normal! Estás en el rango ideal OMS. Mantén tu rutina de ejercicio y alimentación.`;
+    msg = `Tu IMC es ${imc} — ¡Peso Normal! Estás en el rango ideal OMS. ¡Sigue así!`;
     clase = "normal";
   } else if (imc <= 29.9) {
-    msg = `Tu IMC es ${imc} — Sobrepeso. La OMS recomienda mantenerlo bajo 25. Aumenta tu actividad cardio y revisa tu dieta.`;
+    msg = `Tu IMC es ${imc} — Sobrepeso. La OMS recomienda mantenerlo bajo 25. Aumenta tu actividad cardio.`;
     clase = "alerta";
   } else {
-    msg = `Tu IMC es ${imc} — Obesidad. Riesgo cardiovascular elevado. Se recomienda consultar a un profesional de salud.`;
+    msg = `Tu IMC es ${imc} — Obesidad. Riesgo cardiovascular elevado. Consulta a un profesional de salud.`;
     clase = "alerta";
   }
 
   res.innerHTML = `<p class="${clase}">${msg}</p>`;
-  ultimoIMC = msg;
+
+  // Guardar en localStorage
+  guardarDato('imc', msg);
+  guardarDato('imcClase', clase);
+  guardarDato('peso', peso);
+  guardarDato('altura', altura);
 }
 
 // ===== 2. SUEÑO =====
-let ultimoSueno = "No calculado en esta sesión.";
-
 function calcularDescanso() {
   const horas = parseFloat(document.getElementById('horasSueno').value);
   const res = document.getElementById('res-sueno');
@@ -53,17 +72,20 @@ function calcularDescanso() {
 
   let msg = "";
   if (horas < 5) {
-    msg = `Dormiste ${horas}h — Alerta crítica. Sistema nervioso agotado. Solo estiramientos suaves hoy.`;
+    msg = `Dormiste ${horas}h — Alerta crítica. Solo estiramientos suaves hoy. No hagas ejercicio intenso.`;
   } else if (horas < 6) {
-    msg = `Dormiste ${horas}h — Descanso insuficiente. Caminata suave 20 min máximo. Prioriza dormir esta noche.`;
+    msg = `Dormiste ${horas}h — Descanso insuficiente. Caminata suave 20 min máximo.`;
   } else if (horas <= 8) {
-    msg = `Dormiste ${horas}h — Buen descanso. Puedes entrenar a intensidad moderada: caminar 30–45 min, trote suave o funcional.`;
+    msg = `Dormiste ${horas}h — Buen descanso. Entrena a intensidad moderada: caminar 30–45 min o trote suave.`;
   } else {
-    msg = `Dormiste ${horas}h — Descanso óptimo. Estás al 100%. Ideal para HIIT, calistenia o pesas.`;
+    msg = `Dormiste ${horas}h — Descanso óptimo. Ideal para HIIT, calistenia o pesas. ¡Al 100%!`;
   }
 
   res.innerHTML = `<p>${msg}</p>`;
-  ultimoSueno = msg;
+
+  // Guardar en localStorage
+  guardarDato('sueno', msg);
+  guardarDato('horas', horas);
 }
 
 // ===== 3. PODÓMETRO =====
@@ -72,8 +94,7 @@ let pasos = 0;
 let sensorActivo = false;
 let ultimaFuerza = 0;
 
-const claveHoy = 'pasos_' + hoy.toISOString().slice(0, 10);
-pasos = parseInt(localStorage.getItem(claveHoy)) || 0;
+pasos = parseInt(localStorage.getItem('pasos_' + claveHoy)) || 0;
 actualizarDisplay();
 
 function actualizarDisplay() {
@@ -102,7 +123,7 @@ function iniciarPodometro() {
       .then(response => {
         if (response === 'granted') activarSensor();
         else document.getElementById('res-pasos').innerHTML =
-          '<p class="alerta">❌ Permiso denegado. Permite el acceso al movimiento en Ajustes.</p>';
+          '<p class="alerta">❌ Permiso denegado. Actívalo en Ajustes.</p>';
       });
   } else {
     activarSensor();
@@ -114,7 +135,7 @@ function activarSensor() {
   document.getElementById('btn-sensor').textContent = '✅ Sensor Activo – Caminando...';
   document.getElementById('btn-sensor').style.background = '#1a7a3a';
   document.getElementById('res-pasos').innerHTML =
-    '<p class="normal">✅ Sensor activado. Lleva el celular en la mano o bolsillo y camina.</p>';
+    '<p class="normal">✅ Sensor activado. Lleva el celular en la mano o bolsillo.</p>';
   window.addEventListener('devicemotion', detectarPaso);
 }
 
@@ -128,7 +149,7 @@ function detectarPaso(event) {
   );
   if (fuerza > 11.5 && ultimaFuerza <= 11.5) {
     pasos++;
-    localStorage.setItem(claveHoy, pasos);
+    localStorage.setItem('pasos_' + claveHoy, pasos);
     actualizarDisplay();
   }
   ultimaFuerza = fuerza;
@@ -157,7 +178,7 @@ function guardarRutina() {
 function resetearPasos() {
   if (!confirm('¿Iniciar nueva rutina? Los pasos actuales se resetearán.')) return;
   pasos = 0;
-  localStorage.removeItem(claveHoy);
+  localStorage.removeItem('pasos_' + claveHoy);
   if (sensorActivo) {
     window.removeEventListener('devicemotion', detectarPaso);
     sensorActivo = false;
@@ -188,18 +209,24 @@ function mostrarHistorial() {
 
 mostrarHistorial();
 
-// ===== 4. PDF CONSTRUIDO DESDE CERO =====
+// ===== 4. PDF COMPLETO CON DATOS DEL DÍA =====
 function generarPDF() {
   const nombreInput = document.getElementById('nombre-reporte').value.trim();
   const nombreArchivo = nombreInput
     ? nombreInput.replace(/\s+/g, '_')
-    : 'Reporte_KOAJ_' + hoy.toISOString().slice(0, 10);
+    : 'Reporte_KOAJ_' + claveHoy;
 
   const fechaTexto = hoy.toLocaleDateString('es-CO', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
-  const pct = Math.min(((pasos / META_PASOS) * 100).toFixed(1), 100);
+  // Leer datos guardados del día
+  const datos = cargarDatos();
+  const textoIMC = datos.imc || 'No calculado hoy. Ingresa tu peso y altura en la app.';
+  const textoSueno = datos.sueno || 'No calculado hoy. Ingresa tus horas de sueño en la app.';
+
+  const pasosHoy = parseInt(localStorage.getItem('pasos_' + claveHoy)) || 0;
+  const pct = Math.min(((pasosHoy / META_PASOS) * 100).toFixed(1), 100);
 
   const rutinas = JSON.parse(localStorage.getItem('rutinas_guardadas') || '[]');
   let filasRutinas = '';
@@ -230,24 +257,24 @@ function generarPDF() {
 
       <div style="margin-bottom:20px; background:#f9fff9; border-left:4px solid #2ecc71; padding:14px 16px; border-radius:4px;">
         <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 8px;">📊 Salud – IMC (OMS)</h2>
-        <p style="font-size:13px; line-height:1.6; margin:0;">${ultimoIMC}</p>
+        <p style="font-size:13px; line-height:1.6; margin:0;">${textoIMC}</p>
       </div>
 
       <div style="margin-bottom:20px; background:#f9fff9; border-left:4px solid #2ecc71; padding:14px 16px; border-radius:4px;">
         <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 8px;">🌙 Plan según Sueño</h2>
-        <p style="font-size:13px; line-height:1.6; margin:0;">${ultimoSueno}</p>
+        <p style="font-size:13px; line-height:1.6; margin:0;">${textoSueno}</p>
       </div>
 
       <div style="margin-bottom:20px; background:#f9fff9; border-left:4px solid #2ecc71; padding:14px 16px; border-radius:4px;">
         <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 8px;">🚶 Actividad del Día</h2>
         <p style="font-size:13px; line-height:1.6; margin:0;">
-          Pasos hoy: <strong>${pasos.toLocaleString('es-CO')}</strong> de ${META_PASOS.toLocaleString('es-CO')}<br>
+          Pasos hoy: <strong>${pasosHoy.toLocaleString('es-CO')}</strong> de ${META_PASOS.toLocaleString('es-CO')}<br>
           Meta diaria alcanzada: <strong>${pct}%</strong>
         </p>
       </div>
 
       <div style="margin-bottom:24px;">
-        <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 10px;">💾 Historial de Rutinas</h2>
+        <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 10px;">💾 Historial de Rutinas (últimos 15 días)</h2>
         <table style="width:100%; border-collapse:collapse; font-size:13px;">
           <thead>
             <tr style="background:#2ecc71; color:#000;">
@@ -285,3 +312,4 @@ function generarPDF() {
     document.body.removeChild(elemento);
   });
   }
+  
