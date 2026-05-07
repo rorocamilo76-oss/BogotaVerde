@@ -156,7 +156,11 @@
     <hr>
     <p style="color:#1a7a3a; font-weight:bold; text-align:center;">¡Sigue adelante! Cada paso es fuerza vital. — KOAJ App</p>
   </div>
-
   <script src="script.js"></script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/BogotaVerde/sw.js');
+  }
+    </script>
 </body>
             </html>
