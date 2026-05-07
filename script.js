@@ -6,7 +6,7 @@ document.getElementById('fecha-hoy').innerText =
   hoy.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
 // ===== 1. IMC =====
-let ultimoIMC = "";
+let ultimoIMC = "No calculado en esta sesión.";
 
 function calcularIMC() {
   const peso = parseFloat(document.getElementById('peso').value);
@@ -22,25 +22,25 @@ function calcularIMC() {
   let msg = "", clase = "";
 
   if (imc < 18.5) {
-    msg = `Tu IMC es <strong>${imc}</strong> — Bajo peso. Rango ideal OMS: 18.5–24.9. Aumenta tu ingesta calórica saludable con proteínas y grasas buenas.`;
+    msg = `Tu IMC es ${imc} — Bajo peso. Rango ideal OMS: 18.5–24.9. Aumenta tu ingesta calórica saludable con proteínas y grasas buenas.`;
     clase = "alerta";
   } else if (imc <= 24.9) {
-    msg = `Tu IMC es <strong>${imc}</strong> — ¡Peso Normal! Estás en el rango ideal OMS. Mantén tu rutina de ejercicio y alimentación.`;
+    msg = `Tu IMC es ${imc} — ¡Peso Normal! Estás en el rango ideal OMS. Mantén tu rutina de ejercicio y alimentación.`;
     clase = "normal";
   } else if (imc <= 29.9) {
-    msg = `Tu IMC es <strong>${imc}</strong> — Sobrepeso. La OMS recomienda mantenerlo bajo 25. Aumenta tu actividad cardio y revisa tu dieta.`;
+    msg = `Tu IMC es ${imc} — Sobrepeso. La OMS recomienda mantenerlo bajo 25. Aumenta tu actividad cardio y revisa tu dieta.`;
     clase = "alerta";
   } else {
-    msg = `Tu IMC es <strong>${imc}</strong> — Obesidad. Riesgo cardiovascular elevado. Se recomienda consultar a un profesional de salud y comenzar con actividad física suave.`;
+    msg = `Tu IMC es ${imc} — Obesidad. Riesgo cardiovascular elevado. Se recomienda consultar a un profesional de salud.`;
     clase = "alerta";
   }
 
   res.innerHTML = `<p class="${clase}">${msg}</p>`;
-  ultimoIMC = msg.replace(/<[^>]+>/g, '');
+  ultimoIMC = msg;
 }
 
 // ===== 2. SUEÑO =====
-let ultimoSueno = "";
+let ultimoSueno = "No calculado en esta sesión.";
 
 function calcularDescanso() {
   const horas = parseFloat(document.getElementById('horasSueno').value);
@@ -53,17 +53,17 @@ function calcularDescanso() {
 
   let msg = "";
   if (horas < 5) {
-    msg = "⚠️ <strong>Alerta crítica:</strong> Dormiste muy poco. Tu sistema nervioso central está agotado. Solo estiramientos suaves o yoga restaurativo hoy. No hagas ejercicio intenso.";
+    msg = `Dormiste ${horas}h — Alerta crítica. Sistema nervioso agotado. Solo estiramientos suaves hoy.`;
   } else if (horas < 6) {
-    msg = "⚠️ <strong>Descanso insuficiente:</strong> Tu cuerpo necesita más recuperación. Recomendación: caminata suave 20 minutos máximo. Priori­za dormir esta noche.";
+    msg = `Dormiste ${horas}h — Descanso insuficiente. Caminata suave 20 min máximo. Prioriza dormir esta noche.`;
   } else if (horas <= 8) {
-    msg = "✅ <strong>Buen descanso:</strong> Puedes entrenar a intensidad moderada. Camina 30–45 min, trote suave, bicicleta o entrenamiento funcional. ¡Tu cuerpo está listo!";
+    msg = `Dormiste ${horas}h — Buen descanso. Puedes entrenar a intensidad moderada: caminar 30–45 min, trote suave o funcional.`;
   } else {
-    msg = "🔥 <strong>Descanso óptimo:</strong> Estás al 100% de capacidad. Ideal para entrenamiento de alta intensidad, calistenia, pesas o HIIT. ¡Aprovecha tu energía!";
+    msg = `Dormiste ${horas}h — Descanso óptimo. Estás al 100%. Ideal para HIIT, calistenia o pesas.`;
   }
 
   res.innerHTML = `<p>${msg}</p>`;
-  ultimoSueno = msg.replace(/<[^>]+>/g, '');
+  ultimoSueno = msg;
 }
 
 // ===== 3. PODÓMETRO =====
@@ -71,9 +71,7 @@ const META_PASOS = 10000;
 let pasos = 0;
 let sensorActivo = false;
 let ultimaFuerza = 0;
-let umbral = 11.5;
 
-// Cargar pasos del día actual de localStorage
 const claveHoy = 'pasos_' + hoy.toISOString().slice(0, 10);
 pasos = parseInt(localStorage.getItem(claveHoy)) || 0;
 actualizarDisplay();
@@ -95,24 +93,16 @@ function iniciarPodometro() {
 
   if (typeof DeviceMotionEvent === 'undefined') {
     document.getElementById('res-pasos').innerHTML =
-      '<p class="alerta">❌ Tu dispositivo no tiene sensor de movimiento. Usa un celular.</p>';
+      '<p class="alerta">❌ Tu dispositivo no tiene sensor de movimiento.</p>';
     return;
   }
 
-  // iOS 13+ requiere permiso explícito
   if (typeof DeviceMotionEvent.requestPermission === 'function') {
     DeviceMotionEvent.requestPermission()
       .then(response => {
-        if (response === 'granted') {
-          activarSensor();
-        } else {
-          document.getElementById('res-pasos').innerHTML =
-            '<p class="alerta">❌ Permiso denegado. Ve a Ajustes y permite el acceso al movimiento.</p>';
-        }
-      })
-      .catch(err => {
-        document.getElementById('res-pasos').innerHTML =
-          '<p class="alerta">❌ Error al solicitar permiso: ' + err + '</p>';
+        if (response === 'granted') activarSensor();
+        else document.getElementById('res-pasos').innerHTML =
+          '<p class="alerta">❌ Permiso denegado. Permite el acceso al movimiento en Ajustes.</p>';
       });
   } else {
     activarSensor();
@@ -125,22 +115,18 @@ function activarSensor() {
   document.getElementById('btn-sensor').style.background = '#1a7a3a';
   document.getElementById('res-pasos').innerHTML =
     '<p class="normal">✅ Sensor activado. Lleva el celular en la mano o bolsillo y camina.</p>';
-
   window.addEventListener('devicemotion', detectarPaso);
 }
 
 function detectarPaso(event) {
   const acc = event.accelerationIncludingGravity;
   if (!acc || acc.x === null) return;
-
   const fuerza = Math.sqrt(
     Math.pow(acc.x || 0, 2) +
     Math.pow(acc.y || 0, 2) +
     Math.pow(acc.z || 0, 2)
   );
-
-  // Detectar pico (paso) con histeresis para evitar doble conteo
-  if (fuerza > umbral && ultimaFuerza <= umbral) {
+  if (fuerza > 11.5 && ultimaFuerza <= 11.5) {
     pasos++;
     localStorage.setItem(claveHoy, pasos);
     actualizarDisplay();
@@ -154,7 +140,6 @@ function guardarRutina() {
       '<p class="alerta">⚠️ Aún no tienes pasos registrados hoy.</p>';
     return;
   }
-
   const rutinas = JSON.parse(localStorage.getItem('rutinas_guardadas') || '[]');
   const nueva = {
     fecha: hoy.toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }),
@@ -162,29 +147,23 @@ function guardarRutina() {
     pasos: pasos
   };
   rutinas.unshift(nueva);
-  // Guardar máximo 15 rutinas
   if (rutinas.length > 15) rutinas.pop();
   localStorage.setItem('rutinas_guardadas', JSON.stringify(rutinas));
-
   document.getElementById('res-pasos').innerHTML =
-    `<p class="normal">✅ Rutina guardada: <strong>${pasos.toLocaleString('es-CO')} pasos</strong> el ${nueva.fecha} a las ${nueva.hora}</p>`;
-
+    `<p class="normal">✅ Rutina guardada: ${pasos.toLocaleString('es-CO')} pasos el ${nueva.fecha}</p>`;
   mostrarHistorial();
 }
 
 function resetearPasos() {
-  if (!confirm('¿Iniciar nueva rutina? Los pasos actuales se resetearán (la rutina guardada se mantiene).')) return;
+  if (!confirm('¿Iniciar nueva rutina? Los pasos actuales se resetearán.')) return;
   pasos = 0;
   localStorage.removeItem(claveHoy);
-
-  // Desactivar sensor
   if (sensorActivo) {
     window.removeEventListener('devicemotion', detectarPaso);
     sensorActivo = false;
     document.getElementById('btn-sensor').textContent = '🚶 Activar Sensor de Pasos';
     document.getElementById('btn-sensor').style.background = '';
   }
-
   actualizarDisplay();
   document.getElementById('res-pasos').innerHTML =
     '<p class="normal">🔄 Nueva rutina iniciada. ¡A moverse!</p>';
@@ -193,82 +172,116 @@ function resetearPasos() {
 function mostrarHistorial() {
   const rutinas = JSON.parse(localStorage.getItem('rutinas_guardadas') || '[]');
   const cont = document.getElementById('historial-rutinas');
-
-  if (rutinas.length === 0) {
-    cont.innerHTML = '';
-    return;
-  }
-
+  if (rutinas.length === 0) { cont.innerHTML = ''; return; }
   let html = '<p class="historial-titulo">📋 Rutinas guardadas</p>';
   rutinas.forEach(r => {
     const pct = Math.min(Math.round((r.pasos / META_PASOS) * 100), 100);
-    html += `
-      <div class="rutina-item">
-        <div>
-          <div class="rutina-pasos">👟 ${r.pasos.toLocaleString('es-CO')} pasos</div>
-          <div class="rutina-fecha">${r.fecha} · ${r.hora} · ${pct}% meta</div>
-        </div>
-      </div>`;
+    html += `<div class="rutina-item">
+      <div>
+        <div class="rutina-pasos">👟 ${r.pasos.toLocaleString('es-CO')} pasos</div>
+        <div class="rutina-fecha">${r.fecha} · ${r.hora} · ${pct}% meta</div>
+      </div>
+    </div>`;
   });
-
   cont.innerHTML = html;
 }
 
-// Cargar historial al inicio
 mostrarHistorial();
 
-// ===== 4. PDF MEJORADO =====
+// ===== 4. PDF CONSTRUIDO DESDE CERO =====
 function generarPDF() {
   const nombreInput = document.getElementById('nombre-reporte').value.trim();
   const nombreArchivo = nombreInput
     ? nombreInput.replace(/\s+/g, '_')
     : 'Reporte_KOAJ_' + hoy.toISOString().slice(0, 10);
 
-  // Llenar contenido del PDF
-  document.getElementById('pdf-fecha').textContent =
-    hoy.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const fechaTexto = hoy.toLocaleDateString('es-CO', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
 
-  // IMC
-  const imcRes = document.getElementById('res-imc').innerText;
-  document.getElementById('pdf-imc').textContent = imcRes || 'No calculado en esta sesión.';
-
-  // Sueño
-  const suenoRes = document.getElementById('res-sueno').innerText;
-  document.getElementById('pdf-sueno').textContent = suenoRes || 'No calculado en esta sesión.';
-
-  // Pasos
   const pct = Math.min(((pasos / META_PASOS) * 100).toFixed(1), 100);
-  document.getElementById('pdf-pasos').textContent =
-    `Pasos registrados hoy: ${pasos.toLocaleString('es-CO')} de ${META_PASOS.toLocaleString('es-CO')} (${pct}% de la meta diaria).`;
 
-  // Rutinas guardadas
   const rutinas = JSON.parse(localStorage.getItem('rutinas_guardadas') || '[]');
+  let filasRutinas = '';
   if (rutinas.length > 0) {
-    let tabla = '<table style="width:100%; border-collapse:collapse; font-size:13px;">';
-    tabla += '<tr style="background:#e8f5e9;"><th style="padding:6px; border:1px solid #ccc; text-align:left;">Fecha</th><th style="padding:6px; border:1px solid #ccc;">Hora</th><th style="padding:6px; border:1px solid #ccc;">Pasos</th><th style="padding:6px; border:1px solid #ccc;">% Meta</th></tr>';
     rutinas.forEach(r => {
       const p = Math.min(Math.round((r.pasos / META_PASOS) * 100), 100);
-      tabla += `<tr><td style="padding:6px; border:1px solid #eee;">${r.fecha}</td><td style="padding:6px; border:1px solid #eee; text-align:center;">${r.hora}</td><td style="padding:6px; border:1px solid #eee; text-align:center;">${r.pasos.toLocaleString('es-CO')}</td><td style="padding:6px; border:1px solid #eee; text-align:center;">${p}%</td></tr>`;
+      filasRutinas += `
+        <tr>
+          <td style="padding:6px 10px; border:1px solid #ddd;">${r.fecha}</td>
+          <td style="padding:6px 10px; border:1px solid #ddd; text-align:center;">${r.hora}</td>
+          <td style="padding:6px 10px; border:1px solid #ddd; text-align:center;">${r.pasos.toLocaleString('es-CO')}</td>
+          <td style="padding:6px 10px; border:1px solid #ddd; text-align:center;">${p}%</td>
+        </tr>`;
     });
-    tabla += '</table>';
-    document.getElementById('pdf-rutinas').innerHTML = tabla;
   } else {
-    document.getElementById('pdf-rutinas').textContent = 'No hay rutinas guardadas aún.';
+    filasRutinas = '<tr><td colspan="4" style="padding:8px; text-align:center; color:#999;">No hay rutinas guardadas aún.</td></tr>';
   }
 
-  // Mostrar y generar PDF
-  const pdfContent = document.getElementById('pdf-content');
-  pdfContent.style.display = 'block';
+  const html = `
+    <div style="font-family:Arial,sans-serif; color:#111; padding:30px; max-width:700px; margin:auto;">
+      <div style="text-align:center; margin-bottom:24px;">
+        <h1 style="color:#1a7a3a; font-size:28px; margin:0;">KOAJ כּוֹחַ</h1>
+        <p style="color:#555; font-size:13px; margin:4px 0;">Fuerza Vital · Fitness Pro</p>
+        <p style="color:#888; font-size:12px;">${fechaTexto}</p>
+        ${nombreInput ? `<p style="color:#1a7a3a; font-weight:bold;">${nombreInput}</p>` : ''}
+      </div>
+      <hr style="border:2px solid #2ecc71; margin-bottom:24px;">
+
+      <div style="margin-bottom:20px; background:#f9fff9; border-left:4px solid #2ecc71; padding:14px 16px; border-radius:4px;">
+        <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 8px;">📊 Salud – IMC (OMS)</h2>
+        <p style="font-size:13px; line-height:1.6; margin:0;">${ultimoIMC}</p>
+      </div>
+
+      <div style="margin-bottom:20px; background:#f9fff9; border-left:4px solid #2ecc71; padding:14px 16px; border-radius:4px;">
+        <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 8px;">🌙 Plan según Sueño</h2>
+        <p style="font-size:13px; line-height:1.6; margin:0;">${ultimoSueno}</p>
+      </div>
+
+      <div style="margin-bottom:20px; background:#f9fff9; border-left:4px solid #2ecc71; padding:14px 16px; border-radius:4px;">
+        <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 8px;">🚶 Actividad del Día</h2>
+        <p style="font-size:13px; line-height:1.6; margin:0;">
+          Pasos hoy: <strong>${pasos.toLocaleString('es-CO')}</strong> de ${META_PASOS.toLocaleString('es-CO')}<br>
+          Meta diaria alcanzada: <strong>${pct}%</strong>
+        </p>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <h2 style="color:#1a7a3a; font-size:15px; margin:0 0 10px;">💾 Historial de Rutinas</h2>
+        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+          <thead>
+            <tr style="background:#2ecc71; color:#000;">
+              <th style="padding:8px 10px; border:1px solid #ddd; text-align:left;">Fecha</th>
+              <th style="padding:8px 10px; border:1px solid #ddd;">Hora</th>
+              <th style="padding:8px 10px; border:1px solid #ddd;">Pasos</th>
+              <th style="padding:8px 10px; border:1px solid #ddd;">% Meta</th>
+            </tr>
+          </thead>
+          <tbody>${filasRutinas}</tbody>
+        </table>
+      </div>
+
+      <hr style="border:1px solid #ddd; margin-bottom:16px;">
+      <p style="text-align:center; color:#1a7a3a; font-weight:bold; font-size:13px;">
+        ¡Sigue adelante! Cada paso es fuerza vital. — KOAJ כּוֹחַ
+      </p>
+    </div>`;
+
+  const elemento = document.createElement('div');
+  elemento.innerHTML = html;
+  elemento.style.position = 'fixed';
+  elemento.style.left = '-9999px';
+  document.body.appendChild(elemento);
 
   const opt = {
-    margin: 15,
+    margin: 10,
     filename: nombreArchivo + '.pdf',
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
-  html2pdf().set(opt).from(pdfContent).save().then(() => {
-    pdfContent.style.display = 'none';
+  html2pdf().set(opt).from(elemento).save().then(() => {
+    document.body.removeChild(elemento);
   });
-                                                 }
+      }
