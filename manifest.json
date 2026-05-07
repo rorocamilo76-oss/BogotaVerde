@@ -1,9 +1,19 @@
 {
-  "name": "BogotáVerde Pro",
-  "short_name": "B-Verde",
-  "start_url": "index.html",
+  "name": "KOAJ כּוֹחַ – Fuerza Vital",
+  "short_name": "KOAJ",
+  "description": "Tu app de fitness y salud con fuerza vital",
+  "start_url": "/BogotaVerde/index.html",
+  "scope": "/BogotaVerde/",
   "display": "standalone",
-  "background_color": "#0f0f0f",
+  "background_color": "#0a0a0a",
   "theme_color": "#2ecc71",
-  "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/3209/3209128.png", "sizes": "512x512", "type": "image/png" }]
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
