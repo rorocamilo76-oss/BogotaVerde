@@ -19,18 +19,23 @@ function calcularIMC() {
 
   var imc = (peso / (altura * altura)).toFixed(1);
   var msg = '';
+  var color = '#2ecc71';
 
   if (imc < 18.5) {
     msg = 'IMC: ' + imc + ' - Bajo peso. Come mas proteinas y grasas saludables.';
+    color = '#e74c3c';
   } else if (imc <= 24.9) {
-    msg = 'IMC: ' + imc + ' - Peso normal. Estas en el rango ideal OMS.';
+    msg = 'IMC: ' + imc + ' - Peso normal. Estas en el rango ideal OMS. Excelente!';
+    color = '#2ecc71';
   } else if (imc <= 29.9) {
     msg = 'IMC: ' + imc + ' - Sobrepeso. Aumenta el cardio y mejora tu dieta.';
+    color = '#e74c3c';
   } else {
     msg = 'IMC: ' + imc + ' - Obesidad. Consulta a un medico y comienza con caminatas diarias.';
+    color = '#e74c3c';
   }
 
-  res.innerHTML = '<p>' + msg + '</p>';
+  res.innerHTML = '<p style="color:' + color + ';font-weight:bold">' + msg + '</p>';
 }
 
 // ---- 2. SUENO ----
@@ -54,7 +59,7 @@ function calcularDescanso() {
     msg = 'Dormiste ' + horas + 'h. Optimo! Entrena fuerte: HIIT, pesas o calistenia.';
   }
 
-  res.innerHTML = '<p>' + msg + '</p>';
+  res.innerHTML = '<p style="color:#2ecc71;font-weight:bold">' + msg + '</p>';
 }
 
 // ---- 3. PODOMETRO ----
@@ -64,7 +69,7 @@ var sensorActivo = false;
 var ultimaFuerza = 0;
 var claveHoy = 'pasos_' + hoy.toISOString().slice(0, 10);
 
-try { pasos = parseInt(localStorage.getItem(claveHoy)) || 0; } catch(e) {}
+try { pasos = parseInt(localStorage.getItem(claveHoy)) || 0; } catch(e) { pasos = 0; }
 actualizarPasos();
 
 function actualizarPasos() {
@@ -104,7 +109,11 @@ function activarSensor() {
 function contarPaso(e) {
   var acc = e.accelerationIncludingGravity;
   if (!acc) return;
-  var f = Math.sqrt((acc.x||0)*(acc.x||0) + (acc.y||0)*(acc.y||0) + (acc.z||0)*(acc.z||0));
+  var f = Math.sqrt(
+    (acc.x||0)*(acc.x||0) +
+    (acc.y||0)*(acc.y||0) +
+    (acc.z||0)*(acc.z||0)
+  );
   if (f > 12 && ultimaFuerza <= 12) {
     pasos++;
     try { localStorage.setItem(claveHoy, pasos); } catch(e) {}
@@ -114,12 +123,15 @@ function contarPaso(e) {
 }
 
 function guardarRutina() {
-  if (pasos === 0) { alert('No tienes pasos registrados aun.'); return; }
+  if (pasos === 0) {
+    alert('No tienes pasos registrados aun.');
+    return;
+  }
   var rutinas = [];
   try { rutinas = JSON.parse(localStorage.getItem('rutinas') || '[]'); } catch(e) {}
   rutinas.unshift({
     fecha: hoy.toLocaleDateString('es-CO'),
-    hora: hoy.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'}),
+    hora: hoy.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
     pasos: pasos
   });
   if (rutinas.length > 15) rutinas.pop();
@@ -135,7 +147,7 @@ function resetearPasos() {
   if (sensorActivo) {
     window.removeEventListener('devicemotion', contarPaso);
     sensorActivo = false;
-    document.getElementById('btn-sensor').innerText = 'Activar Sensor de Pasos';
+    document.getElementById('btn-sensor').innerText = '🚶 Activar Sensor de Pasos';
     document.getElementById('btn-sensor').style.background = '';
   }
   actualizarPasos();
@@ -149,7 +161,10 @@ function mostrarHistorial() {
   var html = '<p class="historial-titulo">Rutinas guardadas</p>';
   rutinas.forEach(function(r) {
     var pct = Math.min(Math.round((r.pasos / META) * 100), 100);
-    html += '<div class="rutina-item"><div class="rutina-pasos">👟 ' + r.pasos + ' pasos</div><div class="rutina-fecha">' + r.fecha + ' · ' + r.hora + ' · ' + pct + '% meta</div></div>';
+    html += '<div class="rutina-item">'
+      + '<div class="rutina-pasos">👟 ' + r.pasos + ' pasos</div>'
+      + '<div class="rutina-fecha">' + r.fecha + ' · ' + r.hora + ' · ' + pct + '% meta</div>'
+      + '</div>';
   });
   cont.innerHTML = html;
 }
@@ -159,8 +174,8 @@ mostrarHistorial();
 // ---- 4. PDF ----
 function generarPDF() {
   var nombre = document.getElementById('nombre-reporte').value.trim();
-  var archivo = nombre ? nombre.replace(/\s+/g,'_') : 'Reporte_KOAJ_' + hoy.toISOString().slice(0,10);
-  var fecha = hoy.toLocaleDateString('es-CO', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  var archivo = nombre ? nombre.replace(/\s+/g, '_') : 'Reporte_KOAJ_' + hoy.toISOString().slice(0, 10);
+  var fecha = hoy.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   var imc = document.getElementById('res-imc').innerText || 'No calculado. Usa la seccion 1 primero.';
   var sueno = document.getElementById('res-sueno').innerText || 'No calculado. Usa la seccion 2 primero.';
@@ -173,27 +188,42 @@ function generarPDF() {
   var filas = '';
   if (rutinas.length) {
     rutinas.forEach(function(r) {
-      var p = Math.min(Math.round((r.pasos/META)*100),100);
-      filas += '<tr><td style="padding:6px;border:1px solid #ddd">' + r.fecha + '</td><td style="padding:6px;border:1px solid #ddd;text-align:center">' + r.hora + '</td><td style="padding:6px;border:1px solid #ddd;text-align:center">' + r.pasos + '</td><td style="padding:6px;border:1px solid #ddd;text-align:center">' + p + '%</td></tr>';
+      var p = Math.min(Math.round((r.pasos / META) * 100), 100);
+      filas += '<tr>'
+        + '<td style="padding:6px;border:1px solid #ddd">' + r.fecha + '</td>'
+        + '<td style="padding:6px;border:1px solid #ddd;text-align:center">' + r.hora + '</td>'
+        + '<td style="padding:6px;border:1px solid #ddd;text-align:center">' + r.pasos + '</td>'
+        + '<td style="padding:6px;border:1px solid #ddd;text-align:center">' + p + '%</td>'
+        + '</tr>';
     });
   } else {
     filas = '<tr><td colspan="4" style="padding:8px;text-align:center;color:#999">Sin rutinas guardadas aun.</td></tr>';
   }
 
-  var contenido = '<div style="font-family:Arial,sans-serif;padding:30px;color:#111">'
-    + '<h1 style="color:#1a7a3a;text-align:center">KOAJ - Reporte de Rendimiento</h1>'
-    + '<p style="text-align:center;color:#888">' + fecha + '</p>'
+  var contenido = ''
+    + '<div style="font-family:Arial,sans-serif;padding:30px;color:#111;background:#fff">'
+    + '<h1 style="color:#1a7a3a;text-align:center;margin-bottom:4px">KOAJ - Reporte de Rendimiento</h1>'
+    + '<p style="text-align:center;color:#888;margin:0">' + fecha + '</p>'
     + (nombre ? '<p style="text-align:center;color:#1a7a3a;font-weight:bold">' + nombre + '</p>' : '')
     + '<hr style="border:2px solid #2ecc71;margin:20px 0">'
-    + '<h3 style="color:#1a7a3a">📊 IMC - Salud</h3><p>' + imc + '</p>'
-    + '<h3 style="color:#1a7a3a">🌙 Plan segun Sueno</h3><p>' + sueno + '</p>'
+    + '<h3 style="color:#1a7a3a">📊 Salud - IMC (OMS)</h3>'
+    + '<p style="background:#f9fff9;padding:12px;border-left:4px solid #2ecc71">' + imc + '</p>'
+    + '<h3 style="color:#1a7a3a">🌙 Plan segun Sueno</h3>'
+    + '<p style="background:#f9fff9;padding:12px;border-left:4px solid #2ecc71">' + sueno + '</p>'
     + '<h3 style="color:#1a7a3a">🚶 Actividad del Dia</h3>'
-    + '<p>Pasos: <strong>' + pasosTexto + '</strong> &nbsp;|&nbsp; ' + pctTexto + '</p>'
+    + '<p style="background:#f9fff9;padding:12px;border-left:4px solid #2ecc71">Pasos hoy: <strong>' + pasosTexto + '</strong> &nbsp;|&nbsp; ' + pctTexto + '</p>'
     + '<h3 style="color:#1a7a3a">💾 Historial de Rutinas</h3>'
     + '<table style="width:100%;border-collapse:collapse;font-size:13px">'
-    + '<tr style="background:#2ecc71"><th style="padding:8px;border:1px solid #ddd">Fecha</th><th style="padding:8px;border:1px solid #ddd">Hora</th><th style="padding:8px;border:1px solid #ddd">Pasos</th><th style="padding:8px;border:1px solid #ddd">% Meta</th></tr>'
-    + filas + '</table>'
-    + '<hr style="margin:20px 0"><p style="text-align:center;color:#1a7a3a;font-weight:bold">Sigue adelante! Cada paso es fuerza vital. KOAJ App</p>'
+    + '<tr style="background:#2ecc71;color:#000">'
+    + '<th style="padding:8px;border:1px solid #ddd">Fecha</th>'
+    + '<th style="padding:8px;border:1px solid #ddd">Hora</th>'
+    + '<th style="padding:8px;border:1px solid #ddd">Pasos</th>'
+    + '<th style="padding:8px;border:1px solid #ddd">% Meta</th>'
+    + '</tr>'
+    + filas
+    + '</table>'
+    + '<hr style="margin:20px 0">'
+    + '<p style="text-align:center;color:#1a7a3a;font-weight:bold">Sigue adelante! Cada paso es fuerza vital. — KOAJ App</p>'
     + '</div>';
 
   var el = document.createElement('div');
@@ -204,10 +234,10 @@ function generarPDF() {
   html2pdf().set({
     margin: 10,
     filename: archivo + '.pdf',
-    html2canvas: { scale: 2 },
+    html2canvas: { scale: 2, logging: false },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   }).from(el).save().then(function() {
     document.body.removeChild(el);
   });
-      }
-      
+}
+  
